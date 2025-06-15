@@ -645,6 +645,7 @@ function startGame(isHost: boolean, playerName: string, hostId?: string) {
 document.getElementById('hostBtn')?.addEventListener('click', () => {
     const nameInput = document.getElementById('playerName') as HTMLInputElement
     if (nameInput.value.trim()) {
+        console.log('[HOST GAME] Initializing as host with name:', nameInput.value.trim());
         startGame(true, nameInput.value.trim())
     }
 })
@@ -653,6 +654,7 @@ document.getElementById('joinBtn')?.addEventListener('click', () => {
     const nameInput = document.getElementById('playerName') as HTMLInputElement
     const hostIdInput = document.getElementById('hostId') as HTMLInputElement
     if (nameInput.value.trim() && hostIdInput.value.trim()) {
+        console.log('[JOIN GAME] Initializing as client with name:', nameInput.value.trim(), 'connecting to host:', hostIdInput.value.trim());
         startGame(false, nameInput.value.trim(), hostIdInput.value.trim())
     }
 })
