@@ -1,17 +1,27 @@
 const express = require('express');
 const { ExpressPeerServer } = require('peer');
+const cors = require('cors');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 443;
 
-const peerServer = ExpressPeerServer(app, {
+// Enable CORS for all routes
+app.use(cors());
+
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server listening on 0.0.0.0:${PORT}`);
+});
+
+const peerServer = ExpressPeerServer(server, {
   path: '/myapp',
-  allow_discovery: true
+  allow_discovery: true,
+  proxied: true,
+  debug: 3
 });
 
 app.use('/myapp', peerServer);
-app.get('/', (_, res) => res.send('PeerJS Server is running.'));
 
-app.listen(PORT, () => {
-  console.log(`PeerJS server listening on ${PORT}`);
-}); 
+// Add a health check endpoint
+app.get('/health', (_, res) => {
+  res.status(200).send('OK');
+});

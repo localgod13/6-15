@@ -89,21 +89,23 @@ export class NetworkManager {
         this.onRoomCode = onRoomCode || null;
 
         const config = {
-            host: '0.peerjs.com',
-            port: 443,
+            host: 'temp-w9qo.onrender.com',
+            port: 10000,
+            path: '/myapp',
             secure: true,
+            proxied: true,
             debug: 3,
             config: {
                 iceServers: [
-                    { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' }
+                    { urls: 'stun:stun.l.google.com:19302' }
                 ]
             }
         };
 
         if (isHost) {
-            this.peer = new Peer(config);
+            this.peer = new Peer(`host-${Math.random().toString(36).substring(2, 15)}`, config);
             this.peer.on('open', (id) => {
+                console.log('[PEER OPEN] Connected to PeerJS server with ID:', id);
                 if (this.onRoomCode) {
                     this.onRoomCode(id);
                 }
@@ -113,8 +115,12 @@ export class NetworkManager {
         } else if (hostId) {
             this.peer = new Peer(config);
             this.peer.on('open', () => {
+                console.log('[PEER OPEN] Connected to PeerJS server with ID:', this.peer?.id);
                 if (this.peer) {
-                    this.connection = this.peer.connect(hostId);
+                    this.connection = this.peer.connect(hostId, {
+                        reliable: true,
+                        serialization: 'json'
+                    });
                     this.setupConnection();
                 }
             });
@@ -122,6 +128,7 @@ export class NetworkManager {
 
         if (this.peer) {
             this.peer.on('connection', (conn) => {
+                console.log('[PEER CONNECTION] Incoming connection from:', conn.peer);
                 this.connection = conn;
                 this.setupConnection();
                 if (this.isHost) {
@@ -133,8 +140,13 @@ export class NetworkManager {
             });
 
             this.peer.on('error', (err) => {
-                console.error('PeerJS Error:', err);
+                console.error('[PEER ERROR]', err);
                 this.updateStatus(`Error: ${err.message}`);
+                // Attempt to reconnect on error
+                if (this.peer && !this.peer.disconnected) {
+                    console.log('[PEER] Attempting to reconnect...');
+                    this.peer.reconnect();
+                }
             });
 
             this.peer.on('disconnected', () => {
@@ -160,7 +172,7 @@ export class NetworkManager {
 
         this.connection.on('open', () => {
             if (!this.connection) return;
-            console.log('Connection opened with peer:', this.connection.peer);
+            console.log('[CONNECTION OPEN] Connected to peer:', this.connection.peer);
             this.connectionId = this.connection.peer;
             this.isConnected = true;
             this.updateStatus('Connected to host');
