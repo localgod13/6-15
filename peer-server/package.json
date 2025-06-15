@@ -1,13 +1,12 @@
 {
-  "name": "peer-server",
+  "name": "websocket-server",
   "version": "1.0.0",
+  "description": "WebSocket server for MultiRogue",
   "main": "server.cjs",
   "scripts": {
     "start": "node server.cjs"
   },
   "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.21.2",
-    "peer": "^1.0.2"
+    "ws": "^8.0.0"
   }
-}
+} 
