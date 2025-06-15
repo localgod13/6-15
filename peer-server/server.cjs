@@ -1,23 +1,17 @@
 const express = require('express');
-const http = require('http');
-const { createPeerServer } = require('peer');
+const { ExpressPeerServer } = require('peerjs');
 
 const app = express();
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 443;
 
-const server = http.createServer(app);
-
-// Create PeerJS server
-const peerServer = createPeerServer({
-  port: PORT,
-  path: '/myapp',
-  proxied: true,
-  allow_discovery: true,
+const server = app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server listening on 0.0.0.0:${PORT}`);
 });
 
-// Mount PeerJS server middleware
+const peerServer = ExpressPeerServer(server, {
+    path: '/myapp',
+    allow_discovery: true,
+    proxied: true
+});
+
 app.use('/myapp', peerServer);
-
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`PeerJS server running on 0.0.0.0:${PORT}`);
-});
