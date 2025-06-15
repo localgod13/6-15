@@ -1,17 +1,17 @@
 const express = require('express');
-const { ExpressPeerServer } = require('peerjs');
+const { ExpressPeerServer } = require('peerjs'); // <-- This is the correct way
+const cors = require('cors');
 
 const app = express();
-const PORT = process.env.PORT || 443;
+app.use(cors());
 
-const server = app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server listening on 0.0.0.0:${PORT}`);
+const server = app.listen(process.env.PORT || 10000, () => {
+  console.log(`Server listening on port ${process.env.PORT || 10000}`);
 });
 
 const peerServer = ExpressPeerServer(server, {
-    path: '/myapp',
-    allow_discovery: true,
-    proxied: true
+  debug: true,
+  path: '/myapp'
 });
 
 app.use('/myapp', peerServer);
